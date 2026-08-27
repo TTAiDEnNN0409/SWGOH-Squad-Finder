@@ -1,3 +1,17 @@
+const API_URL = "https://swgoh-squad-finder-api.onrender.com";
+
+async function loadRealRoster(allyCode) {
+  const response = await fetch(
+    `${API_URL}/api/roster/${allyCode}`
+  );
+
+  if (!response.ok) {
+    throw new Error("Could not load SWGOH roster.");
+  }
+
+  return await response.json();
+}
+
 const teams = [
   {
     name: "Empire Control",
