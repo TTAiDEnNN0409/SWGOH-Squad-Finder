@@ -26,7 +26,7 @@ async function getPlayer(allyCode) {
     },
     body: JSON.stringify({
       payload: {
-        allyCode: Number(allyCode)
+        allyCode: allyCode
       }
     })
   });
