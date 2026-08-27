@@ -6,79 +6,223 @@
   <title>SWGOH Squad Finder</title>
   <link rel="stylesheet" href="style.css">
 </head>
+
 <body>
+
   <header>
     <div class="logo">SWGOH <span>Squad Finder</span></div>
+
     <nav>
-      <button class="nav-btn active" data-view="finder">Squad Finder</button>
-      <button class="nav-btn" data-view="roster">My Roster</button>
+      <button class="nav-btn active" data-view="finder">
+        Squad Finder
+      </button>
+
+      <button class="nav-btn" data-view="roster">
+        My Roster
+      </button>
     </nav>
   </header>
 
   <main>
+
+    <!-- SQUAD FINDER -->
+
     <section id="finder" class="view active">
+
       <div class="hero">
+
         <p class="eyebrow">ROSTER-BASED TEAM BUILDER</p>
-        <h1>Find the best squads<br><span>you can actually use.</span></h1>
-        <p class="sub">Import your roster and the site will compare your characters against squad templates, synergy, and missing requirements.</p>
-        <button id="demoBtn" class="primary">Load Demo Roster</button>
+
+        <h1>
+          Find the best squads<br>
+          <span>you can actually use.</span>
+        </h1>
+
+        <p class="sub">
+          Import your roster and the site will compare your characters
+          against squad templates, synergy, and missing requirements.
+        </p>
+
+        <button id="demoBtn" class="primary">
+          Load Demo Roster
+        </button>
+
       </div>
+
 
       <div id="emptyState" class="panel empty">
+
         <div class="icon">⚔️</div>
+
         <h2>No roster loaded</h2>
-        <p>Start with the demo roster, or use the roster page to paste your own data.</p>
+
+        <p>
+          Start with the demo roster, or use the roster page
+          to load your own data.
+        </p>
+
       </div>
 
+
       <div id="results" class="hidden">
+
         <div class="section-head">
+
           <div>
             <p class="eyebrow">RECOMMENDATIONS</p>
             <h2>Squads you can build</h2>
           </div>
+
           <select id="filter">
-            <option value="all">All modes</option>
-            <option value="gac">Grand Arena</option>
-            <option value="tw">Territory Wars</option>
-            <option value="pve">PvE</option>
+
+            <option value="all">
+              All modes
+            </option>
+
+            <option value="gac">
+              Grand Arena
+            </option>
+
+            <option value="tw">
+              Territory Wars
+            </option>
+
+            <option value="pve">
+              PvE
+            </option>
+
           </select>
+
         </div>
+
+
         <div id="squadGrid" class="grid"></div>
 
+
         <div class="section-head almost-head">
+
           <div>
             <p class="eyebrow">UP NEXT</p>
             <h2>Almost complete</h2>
           </div>
+
         </div>
+
+
         <div id="almostGrid" class="grid"></div>
+
       </div>
+
     </section>
+
+
+    <!-- MY ROSTER -->
 
     <section id="roster" class="view">
+
       <div class="section-head">
+
         <div>
+
           <p class="eyebrow">YOUR ACCOUNT</p>
+
           <h1>My Roster</h1>
-          <p class="sub">For this prototype, paste one character per line. Example: Darth Vader, R7</p>
+
+          <p class="sub">
+            Enter your Ally Code to automatically retrieve your SWGOH roster.
+          </p>
+
         </div>
+
       </div>
+
+
       <div class="panel">
-        <textarea id="rosterInput" placeholder="Darth Vader, R7
+
+        <h2>
+          Import Your SWGOH Roster
+        </h2>
+
+
+        <p class="note">
+          Enter your Ally Code to automatically load your characters.
+        </p>
+
+
+        <div class="ally-code">
+
+          <input
+            id="allyCodeInput"
+            type="text"
+            placeholder="Enter Ally Code"
+            inputmode="numeric"
+          >
+
+          <button
+            id="loadAllyCode"
+            class="primary"
+          >
+            Load My Roster
+          </button>
+
+        </div>
+
+
+        <p
+          id="rosterStatus"
+          class="note"
+        ></p>
+
+
+        <hr>
+
+
+        <p class="note">
+          Or manually enter your characters:
+        </p>
+
+
+        <textarea
+          id="rosterInput"
+          placeholder="Darth Vader, R7
 Emperor Palpatine, R5
 Mara Jade, R3
-Grand Admiral Thrawn, R7
-Bastila Shan, R5
-Jedi Knight Revan, R5"></textarea>
+Grand Admiral Thrawn, R7"
+        ></textarea>
+
+
         <div class="actions">
-          <button id="saveRoster" class="primary">Analyze Roster</button>
-          <button id="clearRoster" class="secondary">Clear</button>
+
+          <button
+            id="saveRoster"
+            class="primary"
+          >
+            Analyze Roster
+          </button>
+
+          <button
+            id="clearRoster"
+            class="secondary"
+          >
+            Clear
+          </button>
+
         </div>
-        <p class="note">Version 1 uses a small built-in character/team database. The next step is connecting a real SWGOH roster source and expanding the team database.</p>
+
+
+        <p class="note">
+          Your Ally Code is sent to our backend, which retrieves
+          your roster through SWGOH Comlink.
+        </p>
+
       </div>
+
     </section>
+
   </main>
 
-      <script src="app.js"></script>
+
+  <script src="app.js"></script>
+
 </body>
 </html>
