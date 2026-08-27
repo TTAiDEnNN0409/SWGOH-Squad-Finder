@@ -1,318 +1,222 @@
-// SWGOH Squad Finder V2
-// Frontend application logic
-
-const API_BASE = "";
-
-const DEMO_ROSTER = [
-  { name: "Commander Luke Skywalker", relic: 7, gear: 13, stars: 7 },
-  { name: "Han Solo", relic: 7, gear: 13, stars: 7 },
-  { name: "Chewbacca", relic: 7, gear: 13, stars: 7 },
-  { name: "Threepio & Chewie", relic: 7, gear: 13, stars: 7 },
-  { name: "C-3PO", relic: 5, gear: 13, stars: 7 },
-
-  { name: "Jedi Knight Revan", relic: 7, gear: 13, stars: 7 },
-  { name: "Jolee Bindo", relic: 5, gear: 13, stars: 7 },
-  { name: "Bastila Shan", relic: 5, gear: 13, stars: 7 },
-  { name: "Grand Master Yoda", relic: 5, gear: 13, stars: 7 },
-  { name: "General Kenobi", relic: 5, gear: 13, stars: 7 },
-
-  { name: "Darth Revan", relic: 7, gear: 13, stars: 7 },
-  { name: "Darth Malak", relic: 7, gear: 13, stars: 7 },
-  { name: "Bastila Shan (Fallen)", relic: 5, gear: 13, stars: 7 },
-  { name: "HK-47", relic: 5, gear: 13, stars: 7 },
-  { name: "Sith Empire Trooper", relic: 5, gear: 13, stars: 7 },
-
-  { name: "Padmé Amidala", relic: 5, gear: 13, stars: 7 },
-  { name: "General Anakin Skywalker", relic: 7, gear: 13, stars: 7 },
-  { name: "Ahsoka Tano", relic: 5, gear: 13, stars: 7 },
-  { name: "Grand Master Kenobi", relic: 7, gear: 13, stars: 7 },
-  { name: "Shaak Ti", relic: 5, gear: 13, stars: 7 }
-];
-
-const SQUADS = [
+const teams = [
   {
-    name: "Commander Luke Skywalker",
-    members: [
-      "Commander Luke Skywalker",
-      "Han Solo",
-      "Chewbacca",
-      "Threepio & Chewie",
-      "C-3PO"
-    ]
+    name: "Empire Control",
+    leader: "Emperor Palpatine",
+    chars: [
+      "Emperor Palpatine",
+      "Darth Vader",
+      "Mara Jade",
+      "Grand Admiral Thrawn",
+      "Royal Guard"
+    ],
+    score: 94,
+    modes: ["gac", "tw"],
+    reason: "Strong control and turn-meter manipulation."
   },
   {
-    name: "Jedi Knight Revan",
-    members: [
+    name: "Jedi Revan",
+    leader: "Jedi Knight Revan",
+    chars: [
       "Jedi Knight Revan",
-      "Jolee Bindo",
       "Bastila Shan",
+      "Jolee Bindo",
       "Grand Master Yoda",
       "General Kenobi"
-    ]
+    ],
+    score: 91,
+    modes: ["gac", "pve"],
+    reason: "Reliable Jedi team with healing and assists."
   },
   {
-    name: "Darth Revan",
-    members: [
-      "Darth Revan",
-      "Darth Malak",
-      "Bastila Shan (Fallen)",
-      "HK-47",
-      "Sith Empire Trooper"
-    ]
+    name: "Palpatine Empire",
+    leader: "Emperor Palpatine",
+    chars: [
+      "Emperor Palpatine",
+      "Darth Vader",
+      "Grand Admiral Thrawn",
+      "Mara Jade",
+      "Stormtrooper"
+    ],
+    score: 88,
+    modes: ["gac", "pve"],
+    reason: "Flexible Empire team."
   },
   {
-    name: "Padmé Galactic Republic",
-    members: [
-      "Padmé Amidala",
-      "General Anakin Skywalker",
-      "Ahsoka Tano",
-      "Grand Master Kenobi",
-      "Shaak Ti"
-    ]
+    name: "Phoenix",
+    leader: "Hera Syndulla",
+    chars: [
+      "Hera Syndulla",
+      "Captain Rex",
+      "Kanan Jarrus",
+      "Zeb Orrelios",
+      "Chopper"
+    ],
+    score: 86,
+    modes: ["pve", "tw"],
+    reason: "Strong Phoenix synergy."
   }
 ];
 
-function findElement(...selectors) {
-  for (const selector of selectors) {
-    const element = document.querySelector(selector);
-    if (element) return element;
-  }
-  return null;
+const demoRoster = [
+  "Darth Vader",
+  "Emperor Palpatine",
+  "Mara Jade",
+  "Grand Admiral Thrawn",
+  "Royal Guard",
+  "Jedi Knight Revan",
+  "Bastila Shan",
+  "Jolee Bindo",
+  "Grand Master Yoda",
+  "General Kenobi"
+];
+
+let roster = [];
+
+function normalize(name) {
+  return name.trim().toLowerCase();
 }
 
-function normalizeAllyCode(value) {
-  return String(value || "").replace(/\D/g, "");
-}
+function analyze() {
+  const filter = document.getElementById("filter").value;
 
-function setStatus(message, type = "") {
-  const status = findElement(
-    "#status",
-    "#importStatus",
-    ".status",
-    "[data-status]"
-  );
-
-  if (!status) return;
-
-  status.textContent = message;
-  status.className = `status ${type}`.trim();
-}
-
-function getRosterNames(roster) {
-  return new Set(
-    roster
-      .map(character => character.name)
-      .filter(Boolean)
-      .map(name => name.toLowerCase())
-  );
-}
-
-function calculateSquadScore(squad, roster) {
-  const owned = getRosterNames(roster);
-
-  const available = squad.members.filter(member =>
-    owned.has(member.toLowerCase())
-  );
-
-  return {
-    available,
-    missing: squad.members.filter(
-      member => !owned.has(member.toLowerCase())
-    ),
-    score: Math.round((available.length / squad.members.length) * 100)
-  };
-}
-
-function generateRecommendations(roster) {
-  return SQUADS
-    .map(squad => ({
-      ...squad,
-      ...calculateSquadScore(squad, roster)
-    }))
-    .sort((a, b) => b.score - a.score);
-}
-
-function renderRecommendations(recommendations) {
-  const container = findElement(
-    "#recommendations",
-    "#squadResults",
-    ".recommendations",
-    "[data-recommendations]"
-  );
-
-  if (!container) return;
-
-  container.innerHTML = "";
-
-  recommendations.forEach(squad => {
-    const card = document.createElement("div");
-    card.className = "squad-card";
-
-    const members = squad.members
-      .map(member => {
-        const owned = squad.available.includes(member);
-        return `<li class="${owned ? "owned" : "missing"}">
-          ${owned ? "✓" : "○"} ${member}
-        </li>`;
-      })
-      .join("");
-
-    card.innerHTML = `
-      <h3>${squad.name}</h3>
-      <div class="squad-score">${squad.score}% available</div>
-      <ul>${members}</ul>
-      ${
-        squad.missing.length
-          ? `<p>Missing: ${squad.missing.join(", ")}</p>`
-          : `<p>✓ You can build this squad!</p>`
-      }
-    `;
-
-    container.appendChild(card);
+  const availableTeams = teams.filter(team => {
+    return filter === "all" || team.modes.includes(filter);
   });
-}
 
-function renderStats(roster) {
-  const statsContainer = findElement(
-    "#stats",
-    "#rosterStats",
-    ".stats",
-    "[data-stats]"
+  const results = availableTeams.map(team => {
+    const owned = team.chars.filter(character =>
+      roster.map(normalize).includes(normalize(character))
+    );
+
+    const missing = team.chars.filter(character =>
+      !roster.map(normalize).includes(normalize(character))
+    );
+
+    return {
+      ...team,
+      owned,
+      missing,
+      percent: Math.round((owned.length / team.chars.length) * 100)
+    };
+  });
+
+  results.sort((a, b) => b.percent - a.percent);
+
+  const complete = results.filter(team => team.percent === 100);
+  const almost = results.filter(
+    team => team.percent >= 60 && team.percent < 100
   );
 
-  if (!statsContainer) return;
+  displayTeams("squadGrid", complete);
+  displayTeams("almostGrid", almost);
 
-  const characterCount = roster.length;
-  const sevenStar = roster.filter(c => Number(c.stars) >= 7).length;
-  const relics = roster.filter(c => Number(c.relic) > 0).length;
-
-  statsContainer.innerHTML = `
-    <div>
-      <strong>${characterCount}</strong>
-      <span>Characters</span>
-    </div>
-    <div>
-      <strong>${sevenStar}</strong>
-      <span>7★ Characters</span>
-    </div>
-    <div>
-      <strong>${relics}</strong>
-      <span>Relic Characters</span>
-    </div>
-  `;
+  document.getElementById("emptyState").classList.add("hidden");
+  document.getElementById("results").classList.remove("hidden");
 }
 
-function showRoster(roster) {
-  renderStats(roster);
+function displayTeams(elementId, teamsToDisplay) {
+  const container = document.getElementById(elementId);
 
-  const recommendations = generateRecommendations(roster);
-  renderRecommendations(recommendations);
-
-  setStatus(
-    `Loaded ${roster.length} characters. Recommendations generated.`,
-    "success"
-  );
-}
-
-async function loadRoster() {
-  const input = findElement(
-    "#allyCode",
-    "#allycode",
-    "#allyCodeInput",
-    "input[name='allyCode']"
-  );
-
-  const allyCode = normalizeAllyCode(input?.value);
-
-  if (!allyCode) {
-    setStatus("Please enter an Ally Code.", "error");
+  if (teamsToDisplay.length === 0) {
+    container.innerHTML =
+      '<div class="panel"><p>No teams found.</p></div>';
     return;
   }
 
-  setStatus("Loading roster...", "loading");
+  container.innerHTML = teamsToDisplay.map(team => `
+    <div class="card">
+      <div class="card-top">
+        <div>
+          <p class="eyebrow">${team.leader}</p>
+          <h3>${team.name}</h3>
+        </div>
+        <div class="score">${team.percent}%</div>
+      </div>
 
-  try {
-    const response = await fetch(
-      `${API_BASE}/api/roster/${allyCode}`
-    );
+      <div class="bar">
+        <i style="width:${team.percent}%"></i>
+      </div>
 
-    if (!response.ok) {
-      throw new Error("Roster API returned an error.");
-    }
+      <div class="chars">
+        ${team.chars.map(character => `
+          <span class="chip">${character}</span>
+        `).join("")}
+      </div>
 
-    const data = await response.json();
+      ${
+        team.missing.length
+          ? `<p class="missing">Missing: ${team.missing.join(", ")}</p>`
+          : `<p class="meta">All 5 characters owned ✓</p>`
+      }
 
-    const roster =
-      data.roster ||
-      data.rosterUnit ||
-      data.characters ||
-      [];
-
-    if (!Array.isArray(roster) || roster.length === 0) {
-      throw new Error("No roster data was returned.");
-    }
-
-    showRoster(roster);
-  } catch (error) {
-    console.error(error);
-
-    setStatus(
-      "The live roster service isn't connected yet. You can use Demo Mode for now.",
-      "error"
-    );
-  }
+      <p class="meta">${team.reason}</p>
+    </div>
+  `).join("");
 }
 
 function loadDemo() {
-  showRoster(DEMO_ROSTER);
-  setStatus(
-    "Demo roster loaded. These recommendations are examples.",
-    "success"
-  );
+  roster = [...demoRoster];
+
+  analyze();
+
+  alert("Demo roster loaded!");
 }
 
-function setup() {
-  const loadButton = findElement(
-    "#loadRoster",
-    "#importRoster",
-    "#searchButton",
-    "#searchBtn",
-    "[data-action='load']"
-  );
+function analyzeManualRoster() {
+  const text = document.getElementById("rosterInput").value;
 
-  const demoButton = findElement(
-    "#demo",
-    "#demoMode",
-    "#demoButton",
-    "[data-action='demo']"
-  );
+  roster = text
+    .split("\n")
+    .map(line => line.split(",")[0].trim())
+    .filter(Boolean);
 
-  if (loadButton) {
-    loadButton.addEventListener("click", loadRoster);
-  }
+  analyze();
+}
 
-  if (demoButton) {
-    demoButton.addEventListener("click", loadDemo);
-  }
+function clearRoster() {
+  document.getElementById("rosterInput").value = "";
 
-  const input = findElement(
-    "#allyCode",
-    "#allycode",
-    "#allyCodeInput",
-    "input[name='allyCode']"
-  );
+  roster = [];
 
-  if (input) {
-    input.addEventListener("keydown", event => {
-      if (event.key === "Enter") {
-        loadRoster();
-      }
+  document.getElementById("results").classList.add("hidden");
+  document.getElementById("emptyState").classList.remove("hidden");
+}
+
+document.querySelectorAll(".nav-btn").forEach(button => {
+  button.addEventListener("click", () => {
+
+    document.querySelectorAll(".nav-btn").forEach(btn => {
+      btn.classList.remove("active");
     });
-  }
-}
 
-if (document.readyState === "loading") {
-  document.addEventListener("DOMContentLoaded", setup);
-} else {
-  setup();
-}
+    document.querySelectorAll(".view").forEach(view => {
+      view.classList.remove("active");
+    });
+
+    button.classList.add("active");
+
+    document
+      .getElementById(button.dataset.view)
+      .classList.add("active");
+  });
+});
+
+document.getElementById("demoBtn").addEventListener(
+  "click",
+  loadDemo
+);
+
+document.getElementById("saveRoster").addEventListener(
+  "click",
+  analyzeManualRoster
+);
+
+document.getElementById("clearRoster").addEventListener(
+  "click",
+  clearRoster
+);
+
+document.getElementById("filter").addEventListener(
+  "change",
+  analyze
+);
