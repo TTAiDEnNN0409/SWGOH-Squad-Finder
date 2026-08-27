@@ -234,3 +234,37 @@ document.getElementById("filter").addEventListener(
   "change",
   analyze
 );
+
+document.getElementById("loadAllyCode").addEventListener(
+  "click",
+  async () => {
+    const input = document.getElementById("allyCodeInput");
+    const status = document.getElementById("rosterStatus");
+
+    const allyCode = input.value.replace(/\D/g, "");
+
+    if (!allyCode) {
+      status.textContent = "Please enter your Ally Code.";
+      return;
+    }
+
+    status.textContent = "Loading your SWGOH roster...";
+
+    try {
+      const data = await loadRealRoster(allyCode);
+
+      roster = data.roster.map(character => character.id);
+
+      status.textContent =
+        `Loaded ${roster.length} characters from ${data.name}'s roster.`;
+
+      analyze();
+
+    } catch (error) {
+      console.error(error);
+
+      status.textContent =
+        "Could not load your roster. Check your Ally Code and try again.";
+    }
+  }
+);
