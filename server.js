@@ -49,13 +49,15 @@ app.get("/api/roster/:allyCode", async (req, res) => {
     });
 
   } catch (error) {
-    console.error("Comlink request failed:", error);
+  console.error("Comlink request failed:", error);
 
-    res.status(500).json({
-      error: "Unable to retrieve SWGOH roster",
-      message: error.message
-    });
-  }
+  res.status(500).json({
+    error: "Unable to retrieve SWGOH roster",
+    message: error.message,
+    response: error.response?.body || null,
+    statusCode: error.response?.statusCode || null
+  });
+}
 });
 
 app.listen(PORT, () => {
