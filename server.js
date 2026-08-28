@@ -32,9 +32,7 @@ app.get("/api/roster/:allyCode", async (req, res) => {
 
     console.log(`Requesting roster for Ally Code ${allyCode}`);
 
-    const player = await comlink.getPlayer({
-      allyCode: Number(allyCode)
-    });
+    const player = await comlink.getPlayer(Number(allyCode));
 
     const roster = (player.rosterUnit || []).map(unit => ({
       id: unit.definitionId,
