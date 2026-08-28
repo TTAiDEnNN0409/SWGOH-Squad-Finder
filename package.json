@@ -10,7 +10,7 @@
     "node": ">=18"
   },
   "dependencies": {
-    "@swgoh-utils/comlink": "^1.0.0",
+    "@swgoh-utils/comlink": "^2.0.0",
     "express": "^5.1.0"
   }
 }
