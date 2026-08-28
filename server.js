@@ -1,13 +1,17 @@
 const express = require("express");
+const ComlinkStub = require("@swgoh-utils/comlink");
 
 const app = express();
+
 app.use(express.json());
 
 const PORT = process.env.PORT || 3000;
 
-const COMLINK_URL = process.env.COMLINK_URL;
-const ACCESS_KEY = process.env.ACCESS_KEY;
-const SECRET_KEY = process.env.SECRET_KEY;
+const comlink = new ComlinkStub({
+  url: process.env.COMLINK_URL,
+  accessKey: process.env.ACCESS_KEY,
+  secretKey: process.env.SECRET_KEY
+});
 
 app.get("/", (req, res) => {
   res.json({
@@ -16,51 +20,28 @@ app.get("/", (req, res) => {
   });
 });
 
-async function getPlayer(allyCode) {
-  const response = await fetch(`${COMLINK_URL}/player`, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      "access-key": ACCESS_KEY,
-      "secret-key": SECRET_KEY
-    },
-    body: JSON.stringify({
-      payload: {
-        allyCode: allyCode
-      }
-    })
-  });
-
-  const text = await response.text();
-
-  if (!response.ok) {
-    throw new Error(
-      `Comlink error ${response.status}: ${text}`
-    );
-  }
-
-  return JSON.parse(text);
-}
-
 app.get("/api/roster/:allyCode", async (req, res) => {
   try {
-    const allyCode = String(req.params.allyCode).replace(/\D/g, "");
+    const allyCode = req.params.allyCode.replace(/\D/g, "");
 
-    if (!allyCode) {
+    if (allyCode.length !== 9) {
       return res.status(400).json({
-        error: "Invalid Ally Code"
+        error: "Ally Code must contain 9 digits."
       });
     }
 
-    const player = await getPlayer(allyCode);
+    console.log(`Requesting roster for Ally Code ${allyCode}`);
+
+    const player = await comlink.getPlayer({
+      allyCode: Number(allyCode)
+    });
 
     const roster = (player.rosterUnit || []).map(unit => ({
       id: unit.definitionId,
       level: unit.currentLevel || 0,
       stars: unit.currentRarity || 0,
       gear: unit.currentTier || 0,
-      relic: unit.relic?.currentTier || 0,
-      gp: unit.gp || 0
+      relic: unit.relic?.currentTier || 0
     }));
 
     res.json({
@@ -70,7 +51,7 @@ app.get("/api/roster/:allyCode", async (req, res) => {
     });
 
   } catch (error) {
-    console.error(error);
+    console.error("Comlink request failed:", error);
 
     res.status(500).json({
       error: "Unable to retrieve SWGOH roster",
