@@ -9,7 +9,7 @@
   "engines": {
     "node": ">=18"
   },
-  "dependencies": {
-    "express": "^5.1.0"
-  }
+"dependencies": {
+  "@swgoh-utils/comlink": "^1.0.0",
+  "express": "^5.1.0"
 }
