@@ -1,0 +1,3 @@
+flask
+swgoh_comlink
+gunicorn
